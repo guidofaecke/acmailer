@@ -19,14 +19,14 @@ class MezzioMailViewRendererTest extends TestCase
 
     public function setUp(): void
     {
-        $this->innerRenderer = $this->prophesize(TemplateRendererInterface::class);
+        $this->innerRenderer  = $this->prophesize(TemplateRendererInterface::class);
         $this->mezzioRenderer = new MezzioMailViewRenderer($this->innerRenderer->reveal());
     }
 
     /** @test */
     public function renderDelegatesIntoInnerRenderer(): void
     {
-        $params = ['foo' => 'bar'];
+        $params      = ['foo' => 'bar'];
         $innerRender = $this->innerRenderer->render('foo', $params)->willReturn('');
 
         $this->mezzioRenderer->render('foo', $params);

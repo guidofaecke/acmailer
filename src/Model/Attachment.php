@@ -16,7 +16,7 @@ final class Attachment
     public function __construct(string $parserName, $value)
     {
         $this->parserName = $parserName;
-        $this->value = $value;
+        $this->value      = $value;
     }
 
     public static function fromArray(array $data): self

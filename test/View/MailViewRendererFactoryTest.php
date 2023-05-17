@@ -7,7 +7,7 @@ namespace AcMailerTest\View;
 use AcMailer\View\MailViewRendererFactory;
 use AcMailer\View\MezzioMailViewRenderer;
 use AcMailer\View\MvcMailViewRenderer;
-use Interop\Container\ContainerInterface;
+use interop\container\containerinterface;
 use Laminas\View\Renderer\PhpRenderer;
 use Laminas\View\Resolver;
 use Mezzio\Template\TemplateRendererInterface;
@@ -31,7 +31,7 @@ class MailViewRendererFactoryTest extends TestCase
     {
         $theRenderer = $this->prophesize(TemplateRendererInterface::class)->reveal();
 
-        $container = $this->prophesize(ContainerInterface::class);
+        $container       = $this->prophesize(containerinterface::class);
         $hasViewRenderer = $container->has(TemplateRendererInterface::class)->willReturn(true);
         $getViewRenderer = $container->get(TemplateRendererInterface::class)->willReturn($theRenderer);
 
@@ -47,10 +47,10 @@ class MailViewRendererFactoryTest extends TestCase
     {
         $theRenderer = new PhpRenderer();
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $hasViewRenderer = $container->has(TemplateRendererInterface::class)->willReturn(false);
+        $container          = $this->prophesize(containerinterface::class);
+        $hasViewRenderer    = $container->has(TemplateRendererInterface::class)->willReturn(false);
         $hasOldViewRenderer = $container->has('mailviewrenderer')->willReturn(true);
-        $getViewRenderer = $container->get('mailviewrenderer')->willReturn($theRenderer);
+        $getViewRenderer    = $container->get('mailviewrenderer')->willReturn($theRenderer);
 
         $result = $this->factory->__invoke($container->reveal());
 
@@ -63,13 +63,13 @@ class MailViewRendererFactoryTest extends TestCase
     /** @test */
     public function ifStandardServicesAreNotFoundOneIsCreatedOnTheFly(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
+        $container = $this->prophesize(containerinterface::class);
 
-        $hasViewRenderer = $container->has(TemplateRendererInterface::class)->willReturn(false);
+        $hasViewRenderer    = $container->has(TemplateRendererInterface::class)->willReturn(false);
         $hasOldViewRenderer = $container->has('mailviewrenderer')->willReturn(false);
-        $getConfig = $container->get('config')->willReturn([
+        $getConfig          = $container->get('config')->willReturn([
             'view_manager' => [
-                'template_map' => [],
+                'template_map'        => [],
                 'template_path_stack' => [],
             ],
             'view_helpers' => [],
@@ -91,16 +91,16 @@ class MailViewRendererFactoryTest extends TestCase
         array $viewManagerConfig,
         string $expectedResolver
     ): void {
-        $container = $this->prophesize(ContainerInterface::class);
+        $container = $this->prophesize(containerinterface::class);
 
-        $hasViewRenderer = $container->has(TemplateRendererInterface::class)->willReturn(false);
+        $hasViewRenderer    = $container->has(TemplateRendererInterface::class)->willReturn(false);
         $hasOldViewRenderer = $container->has('mailviewrenderer')->willReturn(false);
-        $getConfig = $container->get('config')->willReturn([
+        $getConfig          = $container->get('config')->willReturn([
             'view_manager' => $viewManagerConfig,
         ]);
 
-        $result = $this->factory->__invoke($container->reveal());
-        $ref = new ReflectionObject($result);
+        $result          = $this->factory->__invoke($container->reveal());
+        $ref             = new ReflectionObject($result);
         $wrappedRenderer = $ref->getProperty('renderer');
         $wrappedRenderer->setAccessible(true);
         /** @var PhpRenderer $wrappedRenderer */

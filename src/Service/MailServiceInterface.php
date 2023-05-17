@@ -15,6 +15,7 @@ interface MailServiceInterface
 
     /**
      * Tries to send the message, returning a MailResult object
+     *
      * @param string|array|Email $email
      * @param array $options
      * @throws Exception\InvalidArgumentException

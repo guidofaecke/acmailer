@@ -11,6 +11,7 @@ use Laminas\Mime\Part;
 use Laminas\Stdlib\AbstractOptions;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 use function is_array;
 use function is_dir;
@@ -21,23 +22,23 @@ final class Email extends AbstractOptions
 {
     public const DEFAULT_CHARSET = 'utf-8';
 
-    private string $from = '';
-    private string $fromName = '';
-    private string $replyTo = '';
+    private string $from        = '';
+    private string $fromName    = '';
+    private string $replyTo     = '';
     private string $replyToName = '';
-    private array $to = [];
-    private array $cc = [];
-    private array $bcc = [];
-    private string $encoding = '';
-    private string $subject = '';
+    private array $to           = [];
+    private array $cc           = [];
+    private array $bcc          = [];
+    private string $encoding    = '';
+    private string $subject     = '';
     /** @var string|Part|Message */
-    private $body = '';
-    private ?string $template = null;
+    private $body                 = '';
+    private ?string $template     = null;
     private array $templateParams = [];
-    private array $attachments = [];
+    private array $attachments    = [];
     private array $attachmentsDir = [];
-    private string $charset = self::DEFAULT_CHARSET;
-    private array $customHeaders = [];
+    private string $charset       = self::DEFAULT_CHARSET;
+    private array $customHeaders  = [];
 
     public function __construct($options = null) // phpcs:ignore
     {
@@ -282,6 +283,7 @@ final class Email extends AbstractOptions
 
     /**
      * Returns the list of attachments
+     *
      * @return string[]|resource[]|array[]|Part[]|Attachment[]
      */
     public function getAttachments(): array
@@ -325,8 +327,8 @@ final class Email extends AbstractOptions
         $attachments = $this->getAttachments();
 
         // Process the attachments dir if any, and include the files in that folder
-        $dir = $this->getAttachmentsDir();
-        $path = $dir['path'] ?? null;
+        $dir       = $this->getAttachmentsDir();
+        $path      = $dir['path'] ?? null;
         $recursive = $dir['recursive'] ?? false;
 
         if (is_string($path) && is_dir($path)) {
@@ -335,11 +337,13 @@ final class Email extends AbstractOptions
                 RecursiveIteratorIterator::CHILD_FIRST,
             ) : new DirectoryIterator($path);
 
-            /* @var \SplFileInfo $fileInfo */
+            /** @var SplFileInfo $fileInfo */
             foreach ($files as $fileInfo) {
+                /** @phpstan-ignore-next-line */
                 if ($fileInfo->isDir()) {
                     continue;
                 }
+                /** @phpstan-ignore-next-line */
                 $attachments[] = $fileInfo->getPathname();
             }
         }

@@ -23,7 +23,7 @@ class MvcMailViewRendererTest extends TestCase
     public function setUp(): void
     {
         $this->innerRenderer = $this->prophesize(RendererInterface::class);
-        $this->mvcRenderer = new MvcMailViewRenderer($this->innerRenderer->reveal());
+        $this->mvcRenderer   = new MvcMailViewRenderer($this->innerRenderer->reveal());
     }
 
     /** @test */
@@ -55,7 +55,7 @@ class MvcMailViewRendererTest extends TestCase
     /** @test */
     public function parametersArePassedBothToLayoutAndChildTemplate(): void
     {
-        $callNum = 0;
+        $callNum     = 0;
         $innerRender = $this->innerRenderer->render(Argument::that(function (ViewModel $viewModel) {
             $variables = $viewModel->getVariables();
             Assert::assertArrayHasKey('foo', $variables);
@@ -83,7 +83,7 @@ class MvcMailViewRendererTest extends TestCase
     public function childTemplateNameIsProperlySet(string $expectedName, array $params): void
     {
         $invocationCount = 0;
-        $innerRender = $this->innerRenderer->render(Argument::that(function (ViewModel $viewModel) use (
+        $innerRender     = $this->innerRenderer->render(Argument::that(function (ViewModel $viewModel) use (
             $expectedName,
             &$invocationCount
         ) {

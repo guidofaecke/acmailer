@@ -6,7 +6,7 @@ namespace AcMailerTest\Service\Factory;
 
 use AcMailer\Service\Factory\MailServiceBuilderFactory;
 use AcMailer\Service\MailServiceInterface;
-use Interop\Container\ContainerInterface;
+use interop\container\containerinterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -21,8 +21,8 @@ class MailServiceBuilderFactoryTest extends TestCase
 
     public function setUp(): void
     {
-        $this->factory = new MailServiceBuilderFactory();
-        $this->container = $this->prophesize(ContainerInterface::class);
+        $this->factory   = new MailServiceBuilderFactory();
+        $this->container = $this->prophesize(containerinterface::class);
     }
 
     /**
@@ -34,8 +34,8 @@ class MailServiceBuilderFactoryTest extends TestCase
         $hasConfig = $this->container->has('config')->willReturn($config !== null);
         $getConfig = $this->container->get('config')->willReturn($config);
 
-        $service = ($this->factory)($this->container->reveal(), '');
-        $ref = new ReflectionObject($service);
+        $service      = ($this->factory)($this->container->reveal(), '');
+        $ref          = new ReflectionObject($service);
         $servicesProp = $ref->getProperty('services');
         $servicesProp->setAccessible(true);
 
@@ -46,15 +46,19 @@ class MailServiceBuilderFactoryTest extends TestCase
 
     public function provideConfigs(): iterable
     {
-        $dependencies = ['services' => [
-            'foo' => $this->prophesize(MailServiceInterface::class)->reveal(),
-            'bar' => $this->prophesize(MailServiceInterface::class)->reveal(),
-            'baz' => $this->prophesize(MailServiceInterface::class)->reveal(),
-        ]];
-        $serviceManager = ['services' => [
-            'something' => $this->prophesize(MailServiceInterface::class)->reveal(),
-            'something_else' => $this->prophesize(MailServiceInterface::class)->reveal(),
-        ]];
+        $dependencies   = [
+            'services' => [
+                'foo' => $this->prophesize(MailServiceInterface::class)->reveal(),
+                'bar' => $this->prophesize(MailServiceInterface::class)->reveal(),
+                'baz' => $this->prophesize(MailServiceInterface::class)->reveal(),
+            ],
+        ];
+        $serviceManager = [
+            'services' => [
+                'something'      => $this->prophesize(MailServiceInterface::class)->reveal(),
+                'something_else' => $this->prophesize(MailServiceInterface::class)->reveal(),
+            ],
+        ];
 
         yield 'no config' => [null, []];
         yield 'empty config' => [[], []];

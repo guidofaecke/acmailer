@@ -8,6 +8,7 @@ use AcMailer\Attachment\Helper\AttachmentHelperTrait;
 use AcMailer\Exception\InvalidAttachmentException;
 use Laminas\Mime;
 use Laminas\Mime\Exception\InvalidArgumentException;
+use Laminas\Mime\Part;
 use Laminas\Stdlib\ArrayUtils;
 
 use function is_array;
@@ -19,7 +20,7 @@ class ArrayAttachmentParser implements AttachmentParserInterface
     use AttachmentHelperTrait;
 
     /**
-     * @param string|resource|array|Mime\Part $attachment
+     * @param array|string|resource|Part $attachment
      * @throws InvalidArgumentException
      * @throws InvalidAttachmentException
      */
@@ -31,7 +32,7 @@ class ArrayAttachmentParser implements AttachmentParserInterface
 
         // Set default values for certain properties in the Mime\Part object
         $attachment = ArrayUtils::merge([
-            'encoding' => Mime\Mime::ENCODING_BASE64,
+            'encoding'    => Mime\Mime::ENCODING_BASE64,
             'disposition' => Mime\Mime::DISPOSITION_ATTACHMENT,
         ], $attachment);
 

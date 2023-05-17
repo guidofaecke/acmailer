@@ -13,7 +13,6 @@ use Laminas\Mime\Part;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-use function get_class;
 use function gettype;
 use function implode;
 use function is_object;
@@ -38,7 +37,7 @@ class EmailTest extends TestCase
         $this->expectErrorMessage(sprintf(
             'Provided body is not valid. Expected one of ["%s"], but "%s" was provided',
             implode('", "', ['string', Part::class, Message::class]),
-            is_object($invalidBody) ? get_class($invalidBody) : gettype($invalidBody),
+            is_object($invalidBody) ? $invalidBody::class : gettype($invalidBody),
         ));
         $this->email->setBody($invalidBody);
     }
@@ -87,7 +86,7 @@ class EmailTest extends TestCase
         $this->email->addAttachment(__DIR__ . '/../../test-resources/attachments/file1');
         $this->email->addAttachment(__DIR__ . '/../../test-resources/attachments/file2');
         $this->email->setAttachmentsDir([
-            'path' => __DIR__ . '/../../test-resources/attachments/dir',
+            'path'      => __DIR__ . '/../../test-resources/attachments/dir',
             'recursive' => true,
         ]);
 

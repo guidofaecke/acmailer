@@ -30,9 +30,9 @@ class ArrayAttachmentParserTest extends TestCase
     public function providedAttachmentIsParsedIntoPart(): void
     {
         $attachment = [
-            'id' => 'something',
+            'id'       => 'something',
             'filename' => 'something_else',
-            'content' => 'Hello',
+            'content'  => 'Hello',
             'encoding' => Mime::ENCODING_7BIT,
         ];
 
@@ -49,7 +49,7 @@ class ArrayAttachmentParserTest extends TestCase
     public function idAndNameAreOverriddenIfNameIsProvided(): void
     {
         $attachment = [
-            'id' => 'something',
+            'id'       => 'something',
             'filename' => 'something_else',
         ];
 

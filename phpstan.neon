@@ -1,6 +1,9 @@
 parameters:
-	checkMissingIterableValueType: false
-	checkGenericClassInNonGenericObjectType: false
-	ignoreErrors:
-		- '#is not subtype of Throwable#'
-		- '#Result of && is always false#'
+    level: 9
+    paths:
+        - src
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    ignoreErrors:
+        - '#Result of && is always false#'
+        - '#always exists and is not nullable#'

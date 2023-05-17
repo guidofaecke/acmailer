@@ -6,7 +6,6 @@ namespace AcMailer\Exception;
 
 use InvalidArgumentException as SplInvalidArgumentException;
 
-use function get_class;
 use function gettype;
 use function implode;
 use function is_object;
@@ -23,7 +22,7 @@ class InvalidArgumentException extends SplInvalidArgumentException implements Ex
             'Provided %s is not valid. Expected one of ["%s"], but "%s" was provided',
             $fieldName,
             implode('", "', $types),
-            is_object($value) ? get_class($value) : gettype($value),
+            is_object($value) ? $value::class : gettype($value),
         ));
     }
 }

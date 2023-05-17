@@ -8,6 +8,7 @@ use AcMailer\Attachment\Helper\AttachmentHelperTrait;
 use AcMailer\Exception\InvalidAttachmentException;
 use Laminas\Mime;
 use Laminas\Mime\Exception\InvalidArgumentException;
+use Laminas\Mime\Part;
 
 use function basename;
 use function is_resource;
@@ -18,7 +19,7 @@ class ResourceAttachmentParser implements AttachmentParserInterface
     use AttachmentHelperTrait;
 
     /**
-     * @param string|resource|array|Mime\Part $attachment
+     * @param array|string|resource|Part $attachment
      * @throws InvalidArgumentException
      * @throws InvalidAttachmentException
      */
@@ -29,11 +30,11 @@ class ResourceAttachmentParser implements AttachmentParserInterface
         }
 
         $resourceData = stream_get_meta_data($attachment);
-        $name = $attachmentName ?? (isset($resourceData['uri']) ? basename($resourceData['uri']) : null);
-        $part = new Mime\Part($attachment);
+        $name         = $attachmentName ?? (isset($resourceData['uri']) ? basename($resourceData['uri']) : null);
+        $part         = new Mime\Part($attachment);
 
         // Make sure encoding and disposition have a default value
-        $part->encoding = Mime\Mime::ENCODING_BASE64;
+        $part->encoding    = Mime\Mime::ENCODING_BASE64;
         $part->disposition = Mime\Mime::DISPOSITION_ATTACHMENT;
 
         return $this->applyNameToPart($part, $name);

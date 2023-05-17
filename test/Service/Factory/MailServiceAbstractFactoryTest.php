@@ -14,7 +14,7 @@ use AcMailer\Service\MailService;
 use AcMailer\View\MailViewRendererInterface;
 use AcMailer\View\MezzioMailViewRenderer;
 use AcMailer\View\MvcMailViewRenderer;
-use Interop\Container\ContainerInterface;
+use interop\container\containerinterface;
 use Laminas\Mail\Transport\InMemory;
 use Laminas\Mail\Transport\Smtp;
 use Laminas\Mail\Transport\TransportInterface;
@@ -39,8 +39,8 @@ class MailServiceAbstractFactoryTest extends TestCase
 
     public function setUp(): void
     {
-        $this->factory = new MailServiceAbstractFactory();
-        $this->container = $this->prophesize(ContainerInterface::class);
+        $this->factory   = new MailServiceAbstractFactory();
+        $this->container = $this->prophesize(containerinterface::class);
     }
 
     /**
@@ -120,16 +120,22 @@ class MailServiceAbstractFactoryTest extends TestCase
 
     public function provideValidServiceConfig(): iterable
     {
-        yield [[
-            'transport' => 'sendmail',
-        ]];
-        yield [[
-            'transport' => new Smtp(),
-        ]];
-        yield [[
-            'transport' => new Smtp(),
-            'renderer' => 'my_renderer',
-        ]];
+        yield [
+            [
+                'transport' => 'sendmail',
+            ],
+        ];
+        yield [
+            [
+                'transport' => new Smtp(),
+            ],
+        ];
+        yield [
+            [
+                'transport' => new Smtp(),
+                'renderer'  => 'my_renderer',
+            ],
+        ];
     }
 
     /** @test */
@@ -156,7 +162,7 @@ class MailServiceAbstractFactoryTest extends TestCase
             ],
         ]);
 
-        $transport = $this->prophesize(Smtp::class);
+        $transport           = $this->prophesize(Smtp::class);
         $setTransportOptions = $transport->setOptions(Argument::any())->willReturn($transport->reveal());
         $this->container->has($transportServiceName)->willReturn(true);
         $this->container->get($transportServiceName)->willReturn($transport->reveal());
@@ -208,15 +214,24 @@ class MailServiceAbstractFactoryTest extends TestCase
                 stdClass::class,
             ),
         ];
-        yield [800, false, sprintf(
-            'Provided transport is not valid. Expected one of ["string", "%s"], but "integer" was provided',
-            TransportInterface::class,
-        )];
-        yield ['my_transport', false, sprintf(
-            'Registered transport "my_transport" is not either one of ["sendmail", "smtp", "file", "in_memory", "null"]'
-            . ', a "%s" subclass or a registered service.',
-            TransportInterface::class,
-        )];
+        yield [
+            800,
+            false,
+            sprintf(
+                'Provided transport is not valid. Expected one of ["string", "%s"], but "integer" was provided',
+                TransportInterface::class,
+            ),
+        ];
+        yield [
+            'my_transport',
+            false,
+            sprintf(
+                'Registered transport "my_transport" is not either one of '
+                . '["sendmail", "smtp", "file", "in_memory", "null"]'
+                . ', a "%s" subclass or a registered service.',
+                TransportInterface::class,
+            ),
+        ];
     }
 
     /** @test */
@@ -227,7 +242,7 @@ class MailServiceAbstractFactoryTest extends TestCase
                 'mail_services' => [
                     'default' => [
                         'transport' => 'sendmail',
-                        'renderer' => 'foo_renderer',
+                        'renderer'  => 'foo_renderer',
                     ],
                 ],
             ],
@@ -254,12 +269,12 @@ class MailServiceAbstractFactoryTest extends TestCase
                 'mail_services' => [
                     'default' => [
                         'transport' => 'sendmail',
-                        'extends' => 'another',
+                        'extends'   => 'another',
                     ],
                     'another' => [
                         'extends' => 'foo',
                     ],
-                    'foo' => [
+                    'foo'     => [
                         'extends' => 'default',
                     ],
                 ],
@@ -287,7 +302,7 @@ class MailServiceAbstractFactoryTest extends TestCase
                 'mail_services' => [
                     'default' => [
                         'transport' => 'sendmail',
-                        'extends' => 'invalid',
+                        'extends'   => 'invalid',
                     ],
                 ],
             ],
@@ -316,10 +331,10 @@ class MailServiceAbstractFactoryTest extends TestCase
                         'extends' => 'another',
                     ],
                     'another' => [
-                        'extends' => 'foo',
+                        'extends'  => 'foo',
                         'renderer' => 'my_renderer',
                     ],
-                    'foo' => [
+                    'foo'     => [
                         'transport' => 'my_transport',
                     ],
                 ],
@@ -351,7 +366,7 @@ class MailServiceAbstractFactoryTest extends TestCase
             'acmailer_options' => [
                 'mail_services' => [
                     'default' => [
-                        'transport' => 'sendmail',
+                        'transport'      => 'sendmail',
                         'mail_listeners' => [
                             $this->prophesize(MailListenerInterface::class)->reveal(),
                             'my_lazy_listener',
@@ -383,7 +398,7 @@ class MailServiceAbstractFactoryTest extends TestCase
 
         $mailService = ($this->factory)($this->container->reveal(), 'acmailer.mailservice.default');
 
-        $dispatcher = $this->getObjectProp($mailService, 'dispatcher');
+        $dispatcher     = $this->getObjectProp($mailService, 'dispatcher');
         $listenersQueue = $this->getObjectProp($dispatcher, 'listenersQueue');
 
         $this->assertCount(3, $listenersQueue);
@@ -419,7 +434,7 @@ class MailServiceAbstractFactoryTest extends TestCase
         $getRenderer = $this->container->get($rendererClass)->willReturn($this->prophesize($rendererClass)->reveal());
 
         $mailService = $this->factory->__invoke($this->container->reveal(), 'acmailer.mailservice.default');
-        $renderer = $this->getObjectProp($mailService, 'renderer');
+        $renderer    = $this->getObjectProp($mailService, 'renderer');
 
         $this->assertInstanceOf($expectedRenderer, $renderer);
         $getRenderer->shouldHaveBeenCalled();
@@ -440,7 +455,7 @@ class MailServiceAbstractFactoryTest extends TestCase
                 'mail_services' => [
                     'default' => [
                         'transport' => 'sendmail',
-                        'renderer' => 'foo_renderer',
+                        'renderer'  => 'foo_renderer',
                     ],
                 ],
             ],
@@ -461,9 +476,9 @@ class MailServiceAbstractFactoryTest extends TestCase
 
         $mailService = $this->factory->__invoke($this->container->reveal(), 'acmailer.mailservice.default', [
             'transport' => 'in_memory',
-            'renderer' => 'bar_renderer',
+            'renderer'  => 'bar_renderer',
         ]);
-        $transport = $this->getObjectProp($mailService, 'transport');
+        $transport   = $this->getObjectProp($mailService, 'transport');
 
         $this->assertInstanceOf(InMemory::class, $transport);
         $getFooRenderer->shouldNotHaveBeenCalled();
@@ -493,7 +508,7 @@ class MailServiceAbstractFactoryTest extends TestCase
             $this->prophesize(AttachmentParserManager::class)->reveal(),
         );
 
-        $mailService = $this->factory->__invoke($this->container->reveal(), 'acmailer.mailservice.default');
+        $mailService   = $this->factory->__invoke($this->container->reveal(), 'acmailer.mailservice.default');
         $throwOnCancel = $this->getObjectProp($mailService, 'throwOnCancel');
 
         $this->assertEquals($expected, $throwOnCancel);
@@ -511,7 +526,7 @@ class MailServiceAbstractFactoryTest extends TestCase
      */
     private function getObjectProp(object $obj, string $propName)
     {
-        $ref = new ReflectionObject($obj);
+        $ref  = new ReflectionObject($obj);
         $prop = $ref->getProperty($propName);
         $prop->setAccessible(true);
         return $prop->getValue($obj);

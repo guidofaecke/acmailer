@@ -6,5 +6,4 @@ namespace AcMailer\Event;
 
 final class PreRenderEvent extends WithoutResultAbstractEvent
 {
-
 }

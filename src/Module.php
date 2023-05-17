@@ -13,7 +13,7 @@ class Module
 
     public function __invoke(): array
     {
-        $moduleConfig = $this->getConfig();
+        $moduleConfig                 = $this->getConfig();
         $moduleConfig['dependencies'] = $moduleConfig['service_manager'];
         unset($moduleConfig['service_manager']);
 

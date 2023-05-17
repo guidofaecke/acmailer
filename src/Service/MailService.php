@@ -31,7 +31,6 @@ use Throwable;
 
 use function array_key_exists;
 use function array_merge;
-use function get_class;
 use function gettype;
 use function is_array;
 use function is_object;
@@ -56,19 +55,17 @@ class MailService implements MailServiceInterface, MailListenerHandlerInterface
         EventDispatcherInterface $dispatcher,
         bool $throwOnCancel
     ) {
-        $this->transport = $transport;
-        $this->renderer = $renderer;
-        $this->emailBuilder = $emailBuilder;
+        $this->transport               = $transport;
+        $this->renderer                = $renderer;
+        $this->emailBuilder            = $emailBuilder;
         $this->attachmentParserManager = $attachmentParserManager;
-        $this->dispatcher = $dispatcher;
-        $this->throwOnCancel = $throwOnCancel;
+        $this->dispatcher              = $dispatcher;
+        $this->throwOnCancel           = $throwOnCancel;
     }
 
     /**
      * @param string|array|Email $email
      * @param array $options
-     * @throws NotFoundExceptionInterface
-     * @throws ContainerExceptionInterface
      * @throws Exception\InvalidArgumentException
      * @throws Exception\EmailNotFoundException
      * @throws Exception\MailException
@@ -135,7 +132,7 @@ class MailService implements MailServiceInterface, MailListenerHandlerInterface
         }
 
         $rawBody = $this->renderer->render(
-            $email->getTemplate(),
+            $email->getTemplate() ?? '',
             $this->injectLayoutParam($email->getTemplateParams()),
         );
         $email->setBody($rawBody);
@@ -154,6 +151,7 @@ class MailService implements MailServiceInterface, MailListenerHandlerInterface
 
     /**
      * Sets the message body
+     *
      * @param string|Mime\Part|Mime\Message $body
      * @throws Mime\Exception\InvalidArgumentException
      */
@@ -165,13 +163,13 @@ class MailService implements MailServiceInterface, MailListenerHandlerInterface
 
         // If the body is a string, wrap it into a Mime\Part
         if (is_string($body)) {
-            $mimePart = new Mime\Part($body);
+            $mimePart       = new Mime\Part($body);
             $mimePart->type = $body !== strip_tags($body) ? Mime\Mime::TYPE_HTML : Mime\Mime::TYPE_TEXT;
-            $body = $mimePart;
+            $body           = $mimePart;
         }
 
         $body->charset = $charset;
-        $message = new Mime\Message();
+        $message       = new Mime\Message();
         $message->setParts([$body]);
         return $message;
     }
@@ -193,11 +191,11 @@ class MailService implements MailServiceInterface, MailListenerHandlerInterface
         // Get old message parts
         /** @var Mime\Message $mimeMessage */
         $mimeMessage = $message->getBody();
-        $oldParts = $mimeMessage->getParts();
+        $oldParts    = $mimeMessage->getParts();
 
         // Generate a new Mime\Part for each attachment
         $attachmentParts = [];
-        $info = null;
+        $info            = null;
         foreach ($attachments as $key => $attachment) {
             // If the attachment is an array with "parser_name" and "value" keys, cast it into an Attachment object
             if (is_array($attachment) && isset($attachment['parser_name'], $attachment['value'])) {
@@ -212,11 +210,11 @@ class MailService implements MailServiceInterface, MailListenerHandlerInterface
             }
 
             /** @var AttachmentParserInterface $parser */
-            $parser = $this->attachmentParserManager->get($parserName);
+            $parser          = $this->attachmentParserManager->get($parserName);
             $attachmentValue = $attachment instanceof Attachment ? $attachment->getValue() : $attachment;
-            $part = $parser->parse($attachmentValue, is_string($key) ? $key : null);
+            $part            = $parser->parse($attachmentValue, is_string($key) ? $key : null);
 
-            $part->charset = $email->getCharset();
+            $part->charset     = $email->getCharset();
             $attachmentParts[] = $part;
         }
 
@@ -235,7 +233,7 @@ class MailService implements MailServiceInterface, MailListenerHandlerInterface
             return $attachment->getParserName();
         }
 
-        return is_object($attachment) ? get_class($attachment) : gettype($attachment);
+        return is_object($attachment) ? $attachment::class : gettype($attachment);
     }
 
     private function addCustomHeaders(Message $message, Email $email): void

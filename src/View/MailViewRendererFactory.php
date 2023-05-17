@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace AcMailer\View;
 
-use Interop\Container\ContainerInterface;
-use Interop\Container\ContainerInterface as InteropContainer;
-use Interop\Container\Exception\ContainerException;
-use Interop\Container\Exception\NotFoundException;
+use interop\container\containerinterface;
+use interop\container\exception\containerexception;
+use interop\container\exception\notfoundexception;
 use Laminas\Mvc\Service\ViewHelperManagerFactory;
 use Laminas\ServiceManager\Config;
 use Laminas\View\HelperPluginManager;
@@ -21,6 +20,7 @@ use Mezzio\Template\TemplateRendererInterface;
 use Psr\Container\ContainerExceptionInterface;
 
 use function array_shift;
+use function assert;
 use function count;
 
 class MailViewRendererFactory
@@ -30,21 +30,27 @@ class MailViewRendererFactory
 
     /**
      * @throws ContainerExceptionInterface
-     * @throws ContainerException
-     * @throws NotFoundException
+     * @throws containerexception
+     * @throws notfoundexception
      */
-    public function __invoke(ContainerInterface $container): MailViewRendererInterface
+    public function __invoke(containerinterface $container): MailViewRendererInterface
     {
         // First, if the TemplateRendererInterface is registered as a service, use that service.
         // This should be true in expressive applications
         if ($container->has(TemplateRendererInterface::class)) {
-            return new MezzioMailViewRenderer($container->get(TemplateRendererInterface::class));
+            $templateRendererInterface = $container->get(TemplateRendererInterface::class);
+            assert($templateRendererInterface instanceof TemplateRendererInterface);
+
+            return new MezzioMailViewRenderer($templateRendererInterface);
         }
 
         // If the mailviewrenderer is registered, wrap it into a LaminasViewRenderer
         // This should be true in Laminas/MVC apps, run in a HTTP context
         if ($container->has('mailviewrenderer')) {
-            return $this->wrapLaminasView($container->get('mailviewrenderer'));
+            $mailViewRenderer = $container->get('mailviewrenderer');
+            assert($mailViewRenderer instanceof RendererInterface);
+
+            return $this->wrapLaminasView($mailViewRenderer);
         }
 
         // Finally, create a laminas/view PhpRenderer and wrap it into a LaminasViewRenderer
@@ -83,29 +89,34 @@ class MailViewRendererFactory
 
     /**
      * Creates a view helper manager
-     * @param ContainerInterface|InteropContainer $container
-     * @throws ContainerException
-     * @throws NotFoundException
+     *
+     * @throws containerexception
+     * @throws notfoundexception
      */
-    private function createHelperPluginManager(ContainerInterface $container): HelperPluginManager
+    private function createHelperPluginManager(containerinterface $container): HelperPluginManager
     {
         $factory = new ViewHelperManagerFactory();
         /** @var HelperPluginManager $helperManager */
         $helperManager = $factory($container, ViewHelperManagerFactory::PLUGIN_MANAGER_CLASS);
-        $config = new Config($this->getSpecificConfig($container, 'view_helpers'));
+        $viewHelpers   = $this->getSpecificConfig($container, 'view_helpers');
+        $config        = new Config($viewHelpers);
         $config->configureServiceManager($helperManager);
         return $helperManager;
     }
 
     /**
      * Returns a specific configuration defined by provided key
+     *
      * @return array
-     * @throws ContainerException
-     * @throws NotFoundException
+     * @throws containerexception
+     * @throws notfoundexception
      */
-    private function getSpecificConfig(ContainerInterface $container, string $configKey): array
+    private function getSpecificConfig(containerinterface $container, string $configKey): array
     {
-        return $container->get('config')[$configKey] ?? [];
+        /** @var array $containerConfig */
+        $containerConfig = $container->get('config');
+
+        return $containerConfig[$configKey] ?? [];
     }
 
     /**
