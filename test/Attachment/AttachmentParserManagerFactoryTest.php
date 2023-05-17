@@ -6,7 +6,7 @@ namespace AcMailerTest\Attachment;
 
 use AcMailer\Attachment\AttachmentParserManagerFactory;
 use AcMailer\Attachment\Parser\AttachmentParserInterface;
-use Interop\Container\ContainerInterface;
+use interop\container\containerinterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -24,15 +24,14 @@ class AttachmentParserManagerFactoryTest extends TestCase
     /** @test */
     public function serviceIsProperlyCreated(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
+        $container = $this->prophesize(containerinterface::class);
         $container->get('config')->willReturn([
             'attachment_parsers' => [
                 'services' => [
                     'foo' => $this->prophesize(AttachmentParserInterface::class)->reveal(),
                 ],
             ],
-
-            'acmailer_options' => [
+            'acmailer_options'   => [
                 'attachment_parsers' => [
                     'services' => [
                         'bar' => $this->prophesize(AttachmentParserInterface::class)->reveal(),

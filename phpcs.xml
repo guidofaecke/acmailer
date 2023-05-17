@@ -7,7 +7,7 @@
     <arg name="colors" />
 
     <!-- inherit rules from: -->
-    <rule ref="Shlinkio" />
+    <rule ref="LaminasCodingStandard"/>
 
     <!-- Paths to check -->
     <file>config</file>
@@ -15,4 +15,8 @@
     <file>test</file>
 
     <exclude-pattern>config/mail.global.php</exclude-pattern>
+
+    <rule ref="WebimpressCodingStandard.NamingConventions.AbstractClass.">
+        <exclude name="WebimpressCodingStandard.NamingConventions.AbstractClass.Prefix" />
+    </rule>
 </ruleset>

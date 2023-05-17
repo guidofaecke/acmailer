@@ -27,8 +27,8 @@ class LazyMailListenerTest extends TestCase
 
     public function setUp(): void
     {
-        $this->container = $this->prophesize(ContainerInterface::class);
-        $this->listener = new LazyMailListener('foo', $this->container->reveal());
+        $this->container       = $this->prophesize(ContainerInterface::class);
+        $this->listener        = new LazyMailListener('foo', $this->container->reveal());
         $this->wrappedListener = $this->prophesize(MailListenerInterface::class);
     }
 
@@ -38,7 +38,7 @@ class LazyMailListenerTest extends TestCase
      */
     public function wrappedEventIsCreatedOnceAndCallsAreProxied(string $methodName, object $event): void
     {
-        $method = $this->wrappedListener->__call($methodName, [$event]);
+        $method      = $this->wrappedListener->__call($methodName, [$event]);
         $getListener = $this->container->get('foo')->willReturn($this->wrappedListener->reveal());
 
         $this->listener->{$methodName}($event);
@@ -51,7 +51,7 @@ class LazyMailListenerTest extends TestCase
 
     public function provideMethodName(): iterable
     {
-        $email = new Email();
+        $email  = new Email();
         $result = new MailResult($email);
 
         yield 'onPreRender' => ['onPreRender', new PreRenderEvent($email)];

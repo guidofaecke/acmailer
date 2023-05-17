@@ -9,6 +9,7 @@ use AcMailer\Exception\InvalidAttachmentException;
 use finfo;
 use Laminas\Mime;
 use Laminas\Mime\Exception\InvalidArgumentException;
+use Laminas\Mime\Part;
 
 use function basename;
 use function fopen;
@@ -29,7 +30,7 @@ class FilePathAttachmentParser implements AttachmentParserInterface
     }
 
     /**
-     * @param string|resource|array|Mime\Part $attachment
+     * @param array|string|resource|Part $attachment
      * @throws InvalidArgumentException
      * @throws InvalidAttachmentException
      */
@@ -40,10 +41,11 @@ class FilePathAttachmentParser implements AttachmentParserInterface
         }
 
         $part = new Mime\Part(fopen($attachment, 'rb'));
+        /** @phpstan-ignore-next-line */
         $part->type = $this->finfo->file($attachment);
 
         // Make sure encoding and disposition have a default value
-        $part->encoding = Mime\Mime::ENCODING_BASE64;
+        $part->encoding    = Mime\Mime::ENCODING_BASE64;
         $part->disposition = Mime\Mime::DISPOSITION_ATTACHMENT;
 
         // If the attachment name is not defined, use the attachment's \basename

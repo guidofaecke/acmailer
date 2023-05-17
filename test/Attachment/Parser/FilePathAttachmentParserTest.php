@@ -23,7 +23,7 @@ class FilePathAttachmentParserTest extends TestCase
 
     public function setUp(): void
     {
-        $this->finfo = $this->prophesize(finfo::class);
+        $this->finfo  = $this->prophesize(finfo::class);
         $this->parser = new FilePathAttachmentParser($this->finfo->reveal());
     }
 

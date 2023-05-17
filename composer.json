@@ -1,6 +1,6 @@
 {
-    "name": "acelaya/zf2-acmailer",
-    "description": "Mail sending module for Mezzio and Laminas MVC applications (formerly Zend Expressive and Zend MVC)",
+    "name": "guidofaecke/acmailer",
+    "description": "Mail sending module for Mezzio and Laminas MVC applications",
     "type": "library",
     "authors": [
         {
@@ -15,24 +15,26 @@
         "module",
         "mail"
     ],
-    "homepage": "https://github.com/acmailer/acmailer",
+    "homepage": "https://github.com/guidofaecke/acmailer",
     "license": "MIT",
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": "~8.0.0 || ~8.1.0 || ~8.2.0",
+        "ext-fileinfo": "*",
         "laminas/laminas-mail": "^2.10",
         "laminas/laminas-servicemanager": "^3.0",
         "laminas/laminas-stdlib": "^3.0"
     },
     "require-dev": {
-        "infection/infection": "^0.21",
+        "infection/infection": "^0.26.19",
+        "laminas/laminas-coding-standard": "^2.5",
         "laminas/laminas-mvc": "^3.1",
         "laminas/laminas-view": "^2.9",
         "mezzio/mezzio-template": "^2.0",
         "phpspec/prophecy-phpunit": "^2.0",
-        "phpstan/phpstan": "^0.12.63",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.5",
-        "shlinkio/php-coding-standard": "~2.1.1",
-        "symfony/var-dumper": "^5.2"
+        "symfony/var-dumper": "^5.2",
+        "vimeo/psalm": "^5.11"
     },
     "suggest": {
         "mezzio/mezzio-laminasviewrenderer": "If you want to render email templates using laminas/laminas-view in mezzio applications",
@@ -50,7 +52,11 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "infection/extension-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
     "extra": {
         "zf": {

@@ -17,7 +17,7 @@ final class MessageFactory
     {
         // Prepare Mail Message
         $message = new Message();
-        $from = $email->getFrom();
+        $from    = $email->getFrom();
         if (! empty($from)) {
             $message->setFrom($from, $email->getFromName());
         }

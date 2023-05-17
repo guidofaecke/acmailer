@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace AcMailer\Service\Factory;
 
 use AcMailer\Attachment\AttachmentParserManager;
+use AcMailer\Attachment\AttachmentParserManagerInterface;
 use AcMailer\Event\EventDispatcher;
 use AcMailer\Event\LazyMailListener;
 use AcMailer\Event\MailListenerInterface;
 use AcMailer\Exception;
 use AcMailer\Model\EmailBuilder;
+use AcMailer\Model\EmailBuilderInterface;
 use AcMailer\Service\MailService;
 use AcMailer\View\MailViewRendererInterface;
 use AcMailer\View\MezzioMailViewRenderer;
 use AcMailer\View\MvcMailViewRenderer;
-use Interop\Container\ContainerInterface;
+use interop\container\containerinterface;
 use Laminas\Mail\Transport;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 use Laminas\Stdlib\ArrayUtils;
@@ -25,9 +27,9 @@ use Psr\Container\NotFoundExceptionInterface;
 
 use function array_key_exists;
 use function array_keys;
+use function assert;
 use function count;
 use function explode;
-use function get_class;
 use function gettype;
 use function implode;
 use function in_array;
@@ -39,14 +41,14 @@ use function sprintf;
 
 class MailServiceAbstractFactory implements AbstractFactoryInterface
 {
-    private const ACMAILER_PART = 'acmailer';
+    private const ACMAILER_PART     = 'acmailer';
     private const MAIL_SERVICE_PART = 'mailservice';
-    private const TRANSPORT_MAP = [
-        'sendmail' => Transport\Sendmail::class,
-        'smtp' => Transport\Smtp::class,
-        'file' => Transport\File::class,
+    private const TRANSPORT_MAP     = [
+        'sendmail'  => Transport\Sendmail::class,
+        'smtp'      => Transport\Smtp::class,
+        'file'      => Transport\File::class,
         'in_memory' => Transport\InMemory::class,
-        'null' => Transport\InMemory::class,
+        'null'      => Transport\InMemory::class,
     ];
 
     /**
@@ -63,11 +65,14 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
         }
 
         [$acMailer, $mailService, $specificServiceName] = $parts;
-        if ($acMailer !== self::ACMAILER_PART || $mailService !== static::MAIL_SERVICE_PART) {
+        if ($acMailer !== self::ACMAILER_PART || $mailService !== self::MAIL_SERVICE_PART) {
             return false;
         }
 
-        $config = $container->get('config')['acmailer_options']['mail_services'] ?? [];
+        /** @var array $containerConfig */
+        $containerConfig = $container->get('config');
+        $config          = $containerConfig['acmailer_options']['mail_services'] ?? [];
+
         return array_key_exists($specificServiceName, $config);
     }
 
@@ -83,7 +88,9 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, ?array $factoryOptions = null): MailService // phpcs:ignore
     {
         $specificServiceName = explode('.', $requestedName)[2] ?? null;
-        $mailOptions = $container->get('config')['acmailer_options'] ?? [];
+        /** @var array $containerConfig */
+        $containerConfig            = $container->get('config');
+        $mailOptions                = $containerConfig['acmailer_options'] ?? [];
         $specificMailServiceOptions = $mailOptions['mail_services'][$specificServiceName] ?? null;
 
         if ($specificMailServiceOptions === null) {
@@ -101,15 +108,21 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
             $factoryOptions,
         );
 
-        $transport = $this->createTransport($container, $specificMailServiceOptions);
-        $renderer = $this->createRenderer($container, $specificMailServiceOptions);
+        $transport  = $this->createTransport($container, $specificMailServiceOptions);
+        $renderer   = $this->createRenderer($container, $specificMailServiceOptions);
         $dispatcher = $this->createDispatcher($container, $specificMailServiceOptions);
+
+        $emailBuilder = $container->get(EmailBuilder::class);
+        assert($emailBuilder instanceof EmailBuilderInterface);
+
+        $attachmentParserManager = $container->get(AttachmentParserManager::class);
+        assert($attachmentParserManager instanceof AttachmentParserManagerInterface);
 
         return new MailService(
             $transport,
             $renderer,
-            $container->get(EmailBuilder::class),
-            $container->get(AttachmentParserManager::class),
+            $emailBuilder,
+            $attachmentParserManager,
             $dispatcher,
             $specificMailServiceOptions['throw_on_cancel'] ?? false,
         );
@@ -125,7 +138,7 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
             return $specificOptions;
         }
 
-        $mailServices = $mailOptions['mail_services'];
+        $mailServices     = $mailOptions['mail_services'];
         $processedExtends = [];
         do {
             $serviceToExtend = $specificOptions['extends'] ?? null;
@@ -159,7 +172,7 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    private function createTransport(ContainerInterface $container, array $mailOptions): Transport\TransportInterface
+    private function createTransport(containerinterface $container, array $mailOptions): Transport\TransportInterface
     {
         $transport = $mailOptions['transport'] ?? Transport\Sendmail::class;
         if (! is_string($transport) && ! $transport instanceof Transport\TransportInterface) {
@@ -183,7 +196,10 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
 
         // Check if the transport is a service
         if ($container->has($transport)) {
-            return $container->get($transport);
+            $containerTransport = $container->get($transport);
+            assert($containerTransport instanceof Transport\TransportInterface);
+
+            return $containerTransport;
         }
 
         // The adapter is not valid. Throw an exception
@@ -202,7 +218,7 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
         if ($transport instanceof Transport\Smtp) {
             $transport->setOptions(new Transport\SmtpOptions($mailOptions['transport_options'] ?? []));
         } elseif ($transport instanceof Transport\File) {
-            $transportOptions = $mailOptions['transport_options'] ?? [];
+            $transportOptions         = $mailOptions['transport_options'] ?? [];
             $transportOptions['path'] = $transportOptions['path'] ?? 'data/mail/output';
             $transport->setOptions(new Transport\FileOptions($transportOptions));
         }
@@ -215,10 +231,13 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    private function createRenderer(ContainerInterface $container, array $mailOptions): MailViewRendererInterface
+    private function createRenderer(containerinterface $container, array $mailOptions): MailViewRendererInterface
     {
         if (! isset($mailOptions['renderer'])) {
-            return $container->get(MailViewRendererInterface::class);
+            $mailViewRendererInterface = $container->get(MailViewRendererInterface::class);
+            assert($mailViewRendererInterface instanceof MailViewRendererInterface);
+
+            return $mailViewRendererInterface;
         }
 
         // Resolve renderer service and ensure it has proper type
@@ -238,7 +257,7 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
 
         throw new Exception\InvalidArgumentException(sprintf(
             'Defined renderer of type "%s" is not valid. The renderer must resolve to a instance of ["%s"] types',
-            is_object($renderer) ? get_class($renderer) : gettype($renderer),
+            is_object($renderer) ? $renderer::class : gettype($renderer),
             implode(
                 '", "',
                 [MailViewRendererInterface::class, TemplateRendererInterface::class, RendererInterface::class],
@@ -250,10 +269,10 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
      * @throws Exception\InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
-    private function createDispatcher(ContainerInterface $container, array $mailOptions): EventDispatcher
+    private function createDispatcher(containerinterface $container, array $mailOptions): EventDispatcher
     {
         $dispatcher = new EventDispatcher();
-        $listeners = $mailOptions['mail_listeners'] ?? [];
+        $listeners  = $mailOptions['mail_listeners'] ?? [];
 
         foreach ($listeners as $listener) {
             $dispatcher->attachMailListener(...$this->resolveListener($listener, $container));
@@ -266,7 +285,7 @@ class MailServiceAbstractFactory implements AbstractFactoryInterface
      * @param array|string|MailListenerInterface $listener
      * @throws Exception\InvalidArgumentException
      */
-    private function resolveListener($listener, ContainerInterface $container): array
+    private function resolveListener($listener, containerinterface $container): array
     {
         $priority = 1;
         if (is_array($listener) && array_key_exists('listener', $listener)) {

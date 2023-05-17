@@ -21,6 +21,8 @@ class EmailBuilderFactory
         if (! $container->has('config')) {
             throw new ServiceNotCreatedException('Cannot find a config array in the container');
         }
+
+        /** @var array $config */
         $config = $container->get('config');
 
         return new EmailBuilder($config['acmailer_options']['emails'] ?? []);

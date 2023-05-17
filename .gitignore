@@ -9,3 +9,5 @@ composer.lock
 # Dev asets
 docker-compose.override.yml
 .phpunit.result.cache
+
+.idea

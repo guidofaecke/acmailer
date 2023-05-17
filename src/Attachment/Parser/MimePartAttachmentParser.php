@@ -6,20 +6,20 @@ namespace AcMailer\Attachment\Parser;
 
 use AcMailer\Attachment\Helper\AttachmentHelperTrait;
 use AcMailer\Exception\InvalidAttachmentException;
-use Laminas\Mime;
+use Laminas\Mime\Part;
 
 class MimePartAttachmentParser implements AttachmentParserInterface
 {
     use AttachmentHelperTrait;
 
     /**
-     * @param string|resource|array|Mime\Part $attachment
+     * @param array|string|resource|Part $attachment
      * @throws InvalidAttachmentException
      */
-    public function parse($attachment, ?string $attachmentName = null): Mime\Part
+    public function parse($attachment, ?string $attachmentName = null): Part
     {
-        if (! $attachment instanceof Mime\Part) {
-            throw InvalidAttachmentException::fromExpectedType(Mime\Part::class);
+        if (! $attachment instanceof Part) {
+            throw InvalidAttachmentException::fromExpectedType(Part::class);
         }
 
         return $this->applyNameToPart($attachment, $attachmentName);

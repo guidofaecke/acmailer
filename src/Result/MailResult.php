@@ -15,8 +15,8 @@ class MailResult implements ResultInterface
 
     public function __construct(Email $email, bool $valid = true, ?Throwable $throwable = null)
     {
-        $this->email = $email;
-        $this->valid = $valid;
+        $this->email     = $email;
+        $this->valid     = $valid;
         $this->throwable = $throwable;
     }
 

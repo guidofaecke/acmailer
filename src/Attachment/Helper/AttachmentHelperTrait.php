@@ -11,7 +11,7 @@ trait AttachmentHelperTrait
     private function applyNameToPart(Part $part, ?string $name = null): Part
     {
         if ($name !== null) {
-            $part->id = $name;
+            $part->id       = $name;
             $part->filename = $name;
         }
 

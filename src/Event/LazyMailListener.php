@@ -6,6 +6,8 @@ namespace AcMailer\Event;
 
 use Psr\Container\ContainerInterface;
 
+use function assert;
+
 class LazyMailListener implements MailListenerInterface
 {
     private string $serviceName;
@@ -15,7 +17,7 @@ class LazyMailListener implements MailListenerInterface
     public function __construct(string $serviceName, ContainerInterface $container)
     {
         $this->serviceName = $serviceName;
-        $this->container = $container;
+        $this->container   = $container;
     }
 
     /**
@@ -53,7 +55,10 @@ class LazyMailListener implements MailListenerInterface
     private function getListenerInstance(): MailListenerInterface
     {
         if ($this->wrapped === null) {
-            $this->wrapped = $this->container->get($this->serviceName);
+            $wrapped = $this->container->get($this->serviceName);
+            assert($wrapped instanceof MailListenerInterface);
+
+            $this->wrapped = $wrapped;
         }
 
         return $this->wrapped;

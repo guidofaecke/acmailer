@@ -28,7 +28,7 @@ class ModuleTest extends TestCase
     /** @test */
     public function invokeReturnsContentsFromModuleConfigFile(): void
     {
-        $expectedConfig = include __DIR__ . '/../config/module.config.php';
+        $expectedConfig                 = include __DIR__ . '/../config/module.config.php';
         $expectedConfig['dependencies'] = $expectedConfig['service_manager'];
         unset($expectedConfig['service_manager']);
         $returnedConfig = $this->module->__invoke();

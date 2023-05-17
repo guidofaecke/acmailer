@@ -17,26 +17,25 @@ class EmailBuilderTest extends TestCase
     public function setUp(): void
     {
         $this->builder = new EmailBuilder([
-            'an_email' => [
+            'an_email'        => [
                 'fromName' => 'foobar',
-                'cc' => [
+                'cc'       => [
                     'foo@bar.com',
                 ],
             ],
-            'another_email' => [
+            'another_email'   => [
                 'fromName' => 'something',
-                'bcc' => [
+                'bcc'      => [
                     'bar@foo.com',
                 ],
             ],
-            'extended_email' => [
+            'extended_email'  => [
                 'extends' => 'an_email',
             ],
-
             'invalid_extends' => [
                 'extends' => 'another',
             ],
-            'another' => [
+            'another'         => [
                 'extends' => 'invalid_extends',
             ],
         ]);
@@ -84,7 +83,6 @@ class EmailBuilderTest extends TestCase
             'bar@foo.com',
         ], $email->getBcc());
         $this->assertEquals('foobar', $email->getFromName());
-
 
         $email = $this->builder->build('extended_email');
 
